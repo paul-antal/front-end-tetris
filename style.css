@@ -16,7 +16,7 @@ html, body {
 }
 
 #play-area{
-    background-color: honeydew;
+    background: linear-gradient(to top, honeydew, honeydew 90%, hotpink 90%, hotpink);
     grid-area: play-area;
     display: grid;
     grid-template-columns: repeat(10, 1fr);
