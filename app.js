@@ -1,5 +1,6 @@
 const LINES = 20;
 const COLUMNS = 10;
+const MAX_HEIGHT = 2;
 
 const movementIncrements = {
     ArrowLeft: -1,
@@ -48,6 +49,22 @@ class Shape {
                 c.color))
             .filter(c => c.line >= 0);
     }
+
+    rotate(){
+        for(let cell of this.relativeCells){
+            var line = cell.line;
+            cell.line = cell.column
+            cell.column = -line;
+        }
+    }
+
+    undoRotate(){
+        for(let cell of this.relativeCells){
+            var line = cell.line;
+            cell.line = -cell.column
+            cell.column = line;
+        }
+    }
 }
 
 class GameState {
@@ -72,10 +89,9 @@ class GameState {
     }
 
     freezeShape() {
-        if(this.fallingShape.centerY < 2){
-            this.gameOver = true;
-        }
         for(let cell of this.fallingShape.absoluteCells){
+            if(cell.line < MAX_HEIGHT)
+                this.gameOver = true;
             this.board[cell.line][cell.column] = cell;
         }
         this.fallingShape = undefined;
@@ -178,6 +194,7 @@ class Game {
      */
     constructor(state = new GameState, renderer = new HtmlTetrisRenderer) {
         this.state = state;
+        this.state.fallingShape = generateShape();
         this.renderer = renderer;
     }
 
@@ -211,6 +228,13 @@ class Game {
             return;
         }
 
+        if(e.code === "ArrowUp"){
+            this.state.fallingShape.rotate();
+            if(!this.state.isValid)
+                this.state.fallingShape.undoRotate();
+            return;
+        }
+
         var increment = movementIncrements[e.code];
         if(!increment)
             return;
@@ -225,15 +249,7 @@ class Game {
 let game;
 
 function setup() {
-    let randomState = new GameState();
-    randomState.board[19][1] = new Cell(19, 1, "red");
-    randomState.board[18][1] = new Cell(18, 1, "red");
-    randomState.board[17][2] = new Cell(17, 2, "red");
-    randomState.board[16][3] = new Cell(16, 3, "red");
-    randomState.fallingShape = generateShape();
-    console.log(randomState.isValid)
-    
-    game = new Game(randomState);
+    game = new Game();
 }
 
 function generateShape(){

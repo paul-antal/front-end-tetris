@@ -28,6 +28,6 @@ html, body {
 }
 
 .side{
-    background-color: indigo;
+    background-color: rgb(55, 47, 61);
     grid-area:side-menu;
 }
