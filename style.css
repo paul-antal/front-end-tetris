@@ -1,3 +1,33 @@
-body{
-    background-color: hotpink;
+html, body {
+    margin: 0;
+    padding: 0;
+}
+
+.container {
+    width: 100vw;
+    height: 100vh;
+    display: grid;
+    grid-template-columns: 1fr 200px 450px 1fr;
+    grid-template-rows: 50px 900px 50px;
+    grid-template-areas: 
+    ". side-menu . ."
+    ". side-menu play-area ."
+    ". . . .";
+}
+
+#play-area{
+    background-color: honeydew;
+    grid-area: play-area;
+    display: grid;
+    grid-template-columns: repeat(10, 1fr);
+    grid-template-rows: repeat(20, 1fr);
+}
+
+.block{
+    margin: 2px;
+}
+
+.side{
+    background-color: indigo;
+    grid-area:side-menu;
 }
