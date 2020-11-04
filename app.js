@@ -71,6 +71,7 @@ class GameState {
 
     constructor() {
         this.board = this.createBoard();
+        this.score = 0;
         this.fallingShape = new Shape();
     }
 
@@ -80,12 +81,18 @@ class GameState {
     createBoard() {
         const board = [];
         for (let i = 0; i < LINES; i++) {
-            board[i] = [];
-            for (let j = 0; j < COLUMNS; j++) {
-                board[i][j] = new Cell(i,j);
-            }
+            board[i] = this.createRow();
         }
         return board;
+    }
+
+    createRow(){
+        const row = [];
+        
+        for (let j = 0; j < COLUMNS; j++) {
+            row[j] = new Cell();
+        }
+        return row;
     }
 
     freezeShape() {
@@ -95,6 +102,22 @@ class GameState {
             this.board[cell.line][cell.column] = cell;
         }
         this.fallingShape = undefined;
+    }
+
+    completeLines(){
+        let linesCompleted = 0;
+        for(let i = 0; i < this.board.length; i++){
+            if(this.board[i].every(c => !c.isEmpty)){
+                this.board.splice(i, 1);
+                this.board.splice(0,0,this.createRow())
+                linesCompleted++;
+            }
+        }
+        this.increaseScore(linesCompleted);
+    }
+
+    increaseScore(linesCompleted){
+        this.score += linesCompleted * 100 * (1 + linesCompleted/10);
     }
 
     get isValid(){
@@ -126,6 +149,7 @@ class HtmlTetrisRenderer {
         var element = document.getElementById(this.screenId);
         this.emptyElement(element);
         this.drawBoard(state.board, element);
+        this.drawScore(state.score);
         if(state.fallingShape)
             this.drawShape(state.fallingShape, element)
     }
@@ -170,6 +194,11 @@ class HtmlTetrisRenderer {
         }
     }
 
+    drawScore(score){
+        var scoreElement = document.getElementById("score");
+        scoreElement.innerHTML = score;
+    }
+
     /**
      * 
      * @param {number} line The line of the cell
@@ -187,15 +216,77 @@ class HtmlTetrisRenderer {
     }
 }
 
+class TetrisShapeFactory {
+    static shapeBuilders = [
+        () => new Shape(0, 5, [
+            new Cell(0, 0, "green"),
+            new Cell(1, 0, "green"),
+            new Cell(0, -1, "green"),
+            new Cell(0, 1, "green"),
+        ]),
+        () => new Shape(0, 5, [
+            new Cell(0, 0, "blue"),
+            new Cell(0, 1, "blue"),
+            new Cell(1, 0, "blue"),
+            new Cell(1, -1, "blue"),
+        ]),
+        () => new Shape(0, 5, [
+            new Cell(0, 0, "red"),
+            new Cell(0, -1, "red"),
+            new Cell(1, 0, "red"),
+            new Cell(1, 1, "red"),
+        ]),
+        () => new Shape(0, 5, [
+            new Cell(0, 0, "orange"),
+            new Cell(0, 1, "orange"),
+            new Cell(0, -1, "orange"),
+            new Cell(1, 1, "orange"),
+        ]),
+        () => new Shape(0, 5, [
+            new Cell(0, 0, "yellow"),
+            new Cell(0, 1, "yellow"),
+            new Cell(0, -1, "yellow"),
+            new Cell(1, -1, "yellow"),
+        ]),
+        () => new Shape(0, 5, [
+            new Cell(0, 0, "red"),
+            new Cell(0, -1, "red"),
+            new Cell(1, 0, "red"),
+            new Cell(1, 1, "red"),
+        ]),
+        () => new Shape(0.5, 5.5, [
+            new Cell(0.5, 0.5, "lightblue"),
+            new Cell(0.5, -0.5, "lightblue"),
+            new Cell(-0.5, 0.5, "lightblue"),
+            new Cell(-0.5, -0.5, "lightblue"),
+        ]),
+        () => new Shape(0.5, 5.5, [
+            new Cell(0.5, 0.5, "cyan"),
+            new Cell(1.5, 0.5, "cyan"),
+            new Cell(-0.5, 0.5, "cyan"),
+            new Cell(-1.5, 0.5, "cyan"),
+        ])
+    ]
+
+
+    createRandomShape(){
+        var randomInt = Math.floor(Math.random() * TetrisShapeFactory.shapeBuilders.length);
+        return TetrisShapeFactory.shapeBuilders[randomInt]();
+    }
+}
+
 class Game {
     /**
      * @param {GameState} state The initial state
      * @param {HtmlTetrisRenderer} renderer The renderer used to draw the game
      */
-    constructor(state = new GameState, renderer = new HtmlTetrisRenderer) {
+    constructor(state = new GameState, 
+        renderer = new HtmlTetrisRenderer,
+        shapeBuilder = new TetrisShapeFactory()) {
         this.state = state;
-        this.state.fallingShape = generateShape();
+        this.state.fallingShape = shapeBuilder.createRandomShape();
         this.renderer = renderer;
+        this.shapeBuilder = shapeBuilder;
     }
 
     draw() {
@@ -213,9 +304,10 @@ class Game {
         
         this.state.fallingShape.centerY--;
         this.state.freezeShape();
+        this.state.completeLines();
         if(this.state.gameOver)
             return;
-        this.state.fallingShape = generateShape();
+        this.state.fallingShape = this.shapeBuilder.createRandomShape();
     }
 
     /**

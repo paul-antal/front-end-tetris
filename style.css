@@ -10,13 +10,13 @@ html, body {
     grid-template-columns: 1fr 200px 450px 1fr;
     grid-template-rows: 50px 900px 50px;
     grid-template-areas: 
-    ". side-menu . ."
+    ". . . ."
     ". side-menu play-area ."
     ". . . .";
 }
 
 #play-area{
-    background: linear-gradient(to top, honeydew, honeydew 90%, hotpink 90%, hotpink);
+    background: linear-gradient(to top, darkgrey, darkgrey 90%, hotpink 90%, hotpink);
     grid-area: play-area;
     display: grid;
     grid-template-columns: repeat(10, 1fr);
@@ -24,10 +24,17 @@ html, body {
 }
 
 .block{
-    margin: 2px;
+    border: 1px solid #333
 }
 
 .side{
     background-color: rgb(55, 47, 61);
     grid-area:side-menu;
+}
+
+#score {
+    background-color: honeydew;
+    font-size: 40px;
+    text-align: center;
+    font-family: 'Courier New', Courier, monospace;
 }
