@@ -1,6 +1,11 @@
 const LINES = 20;
 const COLUMNS = 10;
 
+const movementIncrements = {
+    ArrowLeft: -1,
+    ArrowRight: 1
+}
+
 function areCoordinatesValid(line, column){
     return line < LINES && column >= 0 && column < COLUMNS;
 
@@ -105,7 +110,8 @@ class HtmlTetrisRenderer {
         var element = document.getElementById(this.screenId);
         this.emptyElement(element);
         this.drawBoard(state.board, element);
-        this.drawShape(state.fallingShape, element)
+        if(state.fallingShape)
+            this.drawShape(state.fallingShape, element)
     }
 
     /**
@@ -190,8 +196,29 @@ class Game {
         
         this.state.fallingShape.centerY--;
         this.state.freezeShape();
+        if(this.state.gameOver)
+            return;
         this.state.fallingShape = generateShape();
+    }
 
+    /**
+     * 
+     * @param {KeyboardEvent} e 
+     */
+    onKeyPress(e) {
+        if(e.code === "ArrowDown"){
+            this.moveToNextGameState();
+            return;
+        }
+
+        var increment = movementIncrements[e.code];
+        if(!increment)
+            return;
+        this.state.fallingShape.centerX += increment;
+        if(this.state.isValid){
+            return;
+        }
+        this.state.fallingShape.centerX -= increment;
     }
 }
 
@@ -210,7 +237,7 @@ function setup() {
 }
 
 function generateShape(){
-    return new Shape(-10, 4, [new Cell(0, 0, 'blue'), new Cell(0, -1, 'blue'), new Cell(0, 1, 'blue')]);
+    return new Shape(0, 4, [new Cell(0, 0, 'blue'), new Cell(0, -1, 'blue'), new Cell(0, 1, 'blue')]);
 }
 
 function loop() {
@@ -220,5 +247,13 @@ function loop() {
 
 window.onload = function (){
     setup();
-    setInterval(loop, 10);
+    setInterval(loop, 300);
+}
+/**
+ * 
+ * @param {KeyboardEvent} e 
+ */
+window.onkeydown = function(e) {
+    game.onKeyPress(e);
+    game.draw();
 }
