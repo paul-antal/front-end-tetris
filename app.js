@@ -196,7 +196,7 @@ class HtmlTetrisRenderer {
 
     drawScore(score){
         var scoreElement = document.getElementById("score");
-        scoreElement.innerHTML = score;
+        scoreElement.innerHTML = Math.floor(score);
     }
 
     /**
@@ -260,7 +260,7 @@ class TetrisShapeFactory {
             new Cell(-0.5, 0.5, "lightblue"),
             new Cell(-0.5, -0.5, "lightblue"),
         ]),
-        () => new Shape(0.5, 5.5, [
+        () => new Shape(0.5, 4.5, [
             new Cell(0.5, 0.5, "cyan"),
             new Cell(1.5, 0.5, "cyan"),
             new Cell(-0.5, 0.5, "cyan"),
@@ -303,6 +303,12 @@ class Game {
             return;
         
         this.state.fallingShape.centerY--;
+        if(this.forgiveNextTime)
+        {
+            this.forgiveNextTime = false;
+            return;
+        }
+        this.forgiveNextTime = true;
         this.state.freezeShape();
         this.state.completeLines();
         if(this.state.gameOver)
@@ -355,7 +361,7 @@ function loop() {
 
 window.onload = function (){
     setup();
-    setInterval(loop, 300);
+    setInterval(loop, 400);
 }
 /**
  * 
