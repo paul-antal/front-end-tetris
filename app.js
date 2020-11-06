@@ -1,6 +1,8 @@
 const LINES = 20;
 const COLUMNS = 10;
 const MAX_HEIGHT = 2;
+const DEFAULT_START_LINE = 0;
+const DEFAULT_START_COLUMN = 5;
 
 const movementIncrements = {
     ArrowLeft: -1,
@@ -41,18 +43,18 @@ class Shape {
         this.relativeCells = relativeCells;
     }
 
-    get absoluteCells(){
+    absoluteCells(originLine = DEFAULT_START_LINE, originColumn = DEFAULT_START_COLUMN){
         return this.relativeCells.map(
             c => new Cell(
-                c.line + this.centerY, 
-                c.column + this.centerX, 
+                c.line + this.centerY + originLine, 
+                c.column + this.centerX + originColumn, 
                 c.color))
             .filter(c => c.line >= 0);
     }
 
     rotate(){
         for(let cell of this.relativeCells){
-            var line = cell.line;
+            let line = cell.line;
             cell.line = cell.column
             cell.column = -line;
         }
@@ -60,7 +62,7 @@ class Shape {
 
     undoRotate(){
         for(let cell of this.relativeCells){
-            var line = cell.line;
+            let line = cell.line;
             cell.line = -cell.column
             cell.column = line;
         }
@@ -74,6 +76,7 @@ class GameState {
         this.score = 0;
         this.pause = false;
         this.fallingShape = new Shape();
+        this.nextShape = new Shape();
         this.speed = 1;
     }
 
@@ -98,12 +101,13 @@ class GameState {
     }
 
     freezeShape() {
-        for(let cell of this.fallingShape.absoluteCells){
+        for(let cell of this.fallingShape.absoluteCells()){
             if(cell.line < MAX_HEIGHT)
                 this.gameOver = true;
             this.board[cell.line][cell.column] = cell;
         }
-        this.fallingShape = undefined;
+        this.fallingShape = this.nextShape;
+        this.nextShape = undefined;
     }
 
     completeLines(){
@@ -126,7 +130,7 @@ class GameState {
         if(!this.fallingShape)
             return true;
 
-        for(let cell of this.fallingShape.absoluteCells){
+        for(let cell of this.fallingShape.absoluteCells()){
             if(!areCoordinatesValid(cell.line, cell.column) ||
                 !this.board[cell.line][cell.column].isEmpty)
                 return false;
@@ -148,14 +152,33 @@ class HtmlTetrisRenderer {
      * @param {GameState} state The state to draw
      */
     draw(state) {
-        var element = document.getElementById(this.screenId);
+        this.drawGameArea(state);
+        this.drawSideMenu(state);
+    }
+
+
+    /**
+     * @param {GameState} state The state to draw
+     */
+    drawGameArea(state){
+        let element = document.getElementById(this.screenId);
         this.emptyElement(element);
         this.drawBoard(state.board, element);
+        if(state.fallingShape)
+            this.drawShape(state.fallingShape.absoluteCells(), element)
+    }
+
+
+    /**
+     * @param {GameState} state The state to draw
+     */
+    drawSideMenu(state){
         this.drawScore(state.score);
         this.drawState(state.pause, state.gameOver);
         this.drawSpeed(state.speed);
-        if(state.fallingShape)
-            this.drawShape(state.fallingShape, element)
+        let nextShapeElement = document.getElementById("nextShapeContainer");
+        this.emptyElement(nextShapeElement);
+        this.drawShape(state.nextShape.absoluteCells(3,3), nextShapeElement);
     }
 
     /**
@@ -189,8 +212,8 @@ class HtmlTetrisRenderer {
      * @param {Shape} shape 
      */
 
-    drawShape(shape, element){
-        for(let cell of shape.absoluteCells){
+    drawShape(cells, element){
+        for(let cell of cells){
             if(cell.line < 0)
                 continue;
             let cellElement = this.createCell(cell.line, cell.column, cell.color);
@@ -199,18 +222,18 @@ class HtmlTetrisRenderer {
     }
 
     drawScore(score){
-        var scoreElement = document.getElementById("score");
+        let scoreElement = document.getElementById("score");
         scoreElement.innerHTML = Math.floor(score);
     }
 
     drawState(pause, gameOver){
-        var stateElement = document.getElementById("state");
+        let stateElement = document.getElementById("state");
         stateElement.innerHTML = gameOver ? "GAME OVER" : pause ? "PAUSED" : "";
     }
 
     drawSpeed(speed){
-        var speedControls = document.getElementById("speedControls");
-        var speedIndicator = "";
+        let speedControls = document.getElementById("speedControls");
+        let speedIndicator = "";
         for(let i = 0; i < speed; i++){
             speedIndicator += "▶";
         }
@@ -225,7 +248,7 @@ class HtmlTetrisRenderer {
      * @returns {HTMLElement} A new HTML element representing the cell
      */
     createCell(line, column, color) {
-        var cell = document.createElement("div");
+        let cell = document.createElement("div");
         cell.className = "block";
         cell.style.gridRow = line + 1;
         cell.style.gridColumn = column + 1;
@@ -236,49 +259,49 @@ class HtmlTetrisRenderer {
 
 class TetrisShapeFactory {
     static shapeBuilders = [
-        () => new Shape(0, 5, [
+        () => new Shape(0, 0, [
             new Cell(0, 0, "green"),
             new Cell(1, 0, "green"),
             new Cell(0, -1, "green"),
             new Cell(0, 1, "green"),
         ]),
-        () => new Shape(0, 5, [
+        () => new Shape(0, 0, [
             new Cell(0, 0, "blue"),
             new Cell(0, 1, "blue"),
             new Cell(1, 0, "blue"),
             new Cell(1, -1, "blue"),
         ]),
-        () => new Shape(0, 5, [
+        () => new Shape(0, 0, [
             new Cell(0, 0, "red"),
             new Cell(0, -1, "red"),
             new Cell(1, 0, "red"),
             new Cell(1, 1, "red"),
         ]),
-        () => new Shape(0, 5, [
+        () => new Shape(0, 0, [
             new Cell(0, 0, "orange"),
             new Cell(0, 1, "orange"),
             new Cell(0, -1, "orange"),
             new Cell(1, 1, "orange"),
         ]),
-        () => new Shape(0, 5, [
+        () => new Shape(0, 0, [
             new Cell(0, 0, "yellow"),
             new Cell(0, 1, "yellow"),
             new Cell(0, -1, "yellow"),
             new Cell(1, -1, "yellow"),
         ]),
-        () => new Shape(0, 5, [
+        () => new Shape(0, 0, [
             new Cell(0, 0, "red"),
             new Cell(0, -1, "red"),
             new Cell(1, 0, "red"),
             new Cell(1, 1, "red"),
         ]),
-        () => new Shape(0.5, 5.5, [
+        () => new Shape(-0.5, -0.5, [
             new Cell(0.5, 0.5, "lightblue"),
             new Cell(0.5, -0.5, "lightblue"),
             new Cell(-0.5, 0.5, "lightblue"),
             new Cell(-0.5, -0.5, "lightblue"),
         ]),
-        () => new Shape(0.5, 4.5, [
+        () => new Shape(-0.5, -0.5, [
             new Cell(0.5, 0.5, "cyan"),
             new Cell(1.5, 0.5, "cyan"),
             new Cell(-0.5, 0.5, "cyan"),
@@ -288,7 +311,7 @@ class TetrisShapeFactory {
 
 
     createRandomShape(){
-        var randomInt = Math.floor(Math.random() * TetrisShapeFactory.shapeBuilders.length);
+        let randomInt = Math.floor(Math.random() * TetrisShapeFactory.shapeBuilders.length);
         return TetrisShapeFactory.shapeBuilders[randomInt]();
     }
 }
@@ -303,6 +326,7 @@ class Game {
         shapeBuilder = new TetrisShapeFactory()) {
         this.state = state;
         this.state.fallingShape = shapeBuilder.createRandomShape();
+        this.state.nextShape = shapeBuilder.createRandomShape();
         this.renderer = renderer;
         this.shapeBuilder = shapeBuilder;
     }
@@ -331,7 +355,7 @@ class Game {
         this.state.completeLines();
         if(this.state.gameOver)
             return;
-        this.state.fallingShape = this.shapeBuilder.createRandomShape();
+        this.state.nextShape = this.shapeBuilder.createRandomShape();
     }
 
     /**
@@ -368,7 +392,7 @@ class Game {
             return;
         }
 
-        var increment = movementIncrements[e.code];
+        let increment = movementIncrements[e.code];
         if(!increment)
             return;
         this.state.fallingShape.centerX += increment;
@@ -388,7 +412,7 @@ function setup() {
 function generateShape(){
     return new Shape(0, 4, [new Cell(0, 0, 'blue'), new Cell(0, -1, 'blue'), new Cell(0, 1, 'blue')]);
 }
-var currentIteration = 0;
+let currentIteration = 0;
 function loop() {
     currentIteration++;
     if(currentIteration%(11 - game.state.speed * 2) !== 0){

@@ -32,15 +32,16 @@ html, body {
     grid-area:side-menu;
     display: grid;
     grid-template-columns: 1fr;
-    grid-template-rows: 100px 100px 1fr 1fr;
+    grid-template-rows: 130px 100px 100px 1fr 1fr;
     grid-template-areas: 
+    "nextShape"
     "score"
     "speed"
     "state"
     "controls";
 }
 
-#score, #state, #speed {
+#score, #state, #speed, #nextShape {
     background-color: honeydew;
     font-size: 40px;
     text-align: center;
@@ -58,6 +59,20 @@ html, body {
 
 #state {
     grid-area: state
+}
+
+#nextShape {
+    grid-area: nextShape;
+}
+
+#nextShapeContainer {
+    display: grid;
+    justify-content: center;
+}
+
+#nextShapeContainer .block {
+    width: 15px;
+    height: 15px;
 }
 
 .controls{
