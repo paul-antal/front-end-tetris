@@ -152,7 +152,7 @@ class HtmlTetrisRenderer {
         this.emptyElement(element);
         this.drawBoard(state.board, element);
         this.drawScore(state.score);
-        this.drawPauseState(state.pause);
+        this.drawState(state.pause, state.gameOver);
         this.drawSpeed(state.speed);
         if(state.fallingShape)
             this.drawShape(state.fallingShape, element)
@@ -203,9 +203,9 @@ class HtmlTetrisRenderer {
         scoreElement.innerHTML = Math.floor(score);
     }
 
-    drawPauseState(pause){
-        var pauseElement = document.getElementById("pauseState");
-        pauseElement.innerHTML = pause ? "PAUSED" : "";
+    drawState(pause, gameOver){
+        var stateElement = document.getElementById("state");
+        stateElement.innerHTML = gameOver ? "GAME OVER" : pause ? "PAUSED" : "";
     }
 
     drawSpeed(speed){

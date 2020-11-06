@@ -36,11 +36,11 @@ html, body {
     grid-template-areas: 
     "score"
     "speed"
-    "pauseState"
+    "state"
     "controls";
 }
 
-#score, #pauseState, #speed {
+#score, #state, #speed {
     background-color: honeydew;
     font-size: 40px;
     text-align: center;
@@ -56,8 +56,8 @@ html, body {
     grid-area: score;
 }
 
-#pauseState {
-    grid-area: pauseState
+#state {
+    grid-area: state
 }
 
 .controls{
