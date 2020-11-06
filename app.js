@@ -74,6 +74,7 @@ class GameState {
         this.score = 0;
         this.pause = false;
         this.fallingShape = new Shape();
+        this.speed = 1;
     }
 
     /**
@@ -152,6 +153,7 @@ class HtmlTetrisRenderer {
         this.drawBoard(state.board, element);
         this.drawScore(state.score);
         this.drawPauseState(state.pause);
+        this.drawSpeed(state.speed);
         if(state.fallingShape)
             this.drawShape(state.fallingShape, element)
     }
@@ -204,6 +206,15 @@ class HtmlTetrisRenderer {
     drawPauseState(pause){
         var pauseElement = document.getElementById("pauseState");
         pauseElement.innerHTML = pause ? "PAUSED" : "";
+    }
+
+    drawSpeed(speed){
+        var speedControls = document.getElementById("speedControls");
+        var speedIndicator = "";
+        for(let i = 0; i < speed; i++){
+            speedIndicator += "▶";
+        }
+        speedControls.innerHTML = speedIndicator;
     }
 
     /**
@@ -328,6 +339,14 @@ class Game {
      * @param {KeyboardEvent} e 
      */
     onKeyPress(e) {
+        if(e.code === "Equal"){
+            this.state.speed = Math.min(this.state.speed + 1, 5);
+        }
+
+        if(e.code === "Minus"){
+            this.state.speed = Math.max(1, this.state.speed - 1)
+        }
+
         if(e.code === "Escape"){
             this.state.pause = !this.state.pause;
             return;
@@ -369,15 +388,19 @@ function setup() {
 function generateShape(){
     return new Shape(0, 4, [new Cell(0, 0, 'blue'), new Cell(0, -1, 'blue'), new Cell(0, 1, 'blue')]);
 }
-
+var currentIteration = 0;
 function loop() {
+    currentIteration++;
+    if(currentIteration%(11 - game.state.speed * 2) !== 0){
+        return;
+    }
     game.moveToNextGameState();
     game.draw();
 }
 
 window.onload = function (){
     setup();
-    setInterval(loop, 400);
+    setInterval(loop, 70);
 }
 /**
  * 

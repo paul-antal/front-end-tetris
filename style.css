@@ -32,18 +32,24 @@ html, body {
     grid-area:side-menu;
     display: grid;
     grid-template-columns: 1fr;
-    grid-template-rows: 100px 1fr 1fr;
+    grid-template-rows: 100px 100px 1fr 1fr;
     grid-template-areas: 
     "score"
+    "speed"
     "pauseState"
     "controls";
 }
 
-#score, #pauseState {
+#score, #pauseState, #speed {
     background-color: honeydew;
     font-size: 40px;
     text-align: center;
     font-family: 'Courier New', Courier, monospace;
+}
+
+#speedControls {
+    font-family: unset;
+    color: black;
 }
 
 #score {
