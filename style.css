@@ -32,7 +32,7 @@ html, body {
     grid-area:side-menu;
 }
 
-#score {
+#score, #pauseState {
     background-color: honeydew;
     font-size: 40px;
     text-align: center;

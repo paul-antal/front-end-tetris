@@ -72,6 +72,7 @@ class GameState {
     constructor() {
         this.board = this.createBoard();
         this.score = 0;
+        this.pause = false;
         this.fallingShape = new Shape();
     }
 
@@ -150,6 +151,7 @@ class HtmlTetrisRenderer {
         this.emptyElement(element);
         this.drawBoard(state.board, element);
         this.drawScore(state.score);
+        this.drawPauseState(state.pause);
         if(state.fallingShape)
             this.drawShape(state.fallingShape, element)
     }
@@ -197,6 +199,11 @@ class HtmlTetrisRenderer {
     drawScore(score){
         var scoreElement = document.getElementById("score");
         scoreElement.innerHTML = Math.floor(score);
+    }
+
+    drawPauseState(pause){
+        var pauseElement = document.getElementById("pauseState");
+        pauseElement.innerHTML = pause ? "PAUSED" : "";
     }
 
     /**
@@ -294,7 +301,7 @@ class Game {
     }
 
     moveToNextGameState(){
-        if(this.state.gameOver){
+        if(this.state.gameOver || this.state.pause){
             return;
         }
         
@@ -321,6 +328,15 @@ class Game {
      * @param {KeyboardEvent} e 
      */
     onKeyPress(e) {
+        if(e.code === "Escape"){
+            this.state.pause = !this.state.pause;
+            return;
+        }
+
+        if(this.state.pause){
+            return;
+        }
+
         if(e.code === "ArrowDown"){
             this.moveToNextGameState();
             return;
