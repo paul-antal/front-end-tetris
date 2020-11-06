@@ -30,6 +30,13 @@ html, body {
 .side{
     background-color: rgb(55, 47, 61);
     grid-area:side-menu;
+    display: grid;
+    grid-template-columns: 1fr;
+    grid-template-rows: 100px 1fr 1fr;
+    grid-template-areas: 
+    "score"
+    "pauseState"
+    "controls";
 }
 
 #score, #pauseState {
@@ -37,4 +44,20 @@ html, body {
     font-size: 40px;
     text-align: center;
     font-family: 'Courier New', Courier, monospace;
+}
+
+#score {
+    grid-area: score;
+}
+
+#pauseState {
+    grid-area: pauseState
+}
+
+.controls{
+    grid-area: controls;
+    font-size: 20px;
+    background-color: honeydew;
+    text-align: center;
+    padding: 5px;
 }
